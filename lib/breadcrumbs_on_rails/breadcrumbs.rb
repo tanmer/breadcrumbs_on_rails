@@ -85,13 +85,18 @@ module BreadcrumbsOnRails
       end
 
       def render_element(element)
+        name = compute_name(element)
+        path = compute_path(element)
         if element.path == nil
-          content = compute_name(element)
+          content = name
         else
-          content = @context.link_to_unless_current(compute_name(element), compute_path(element), element.options)
+          content = @context.link_to_unless_current(name, path, element.options)
         end
         if @options[:tag]
-          @context.content_tag(@options[:tag], content, class: @options[:tag_class])
+          active = element.path.nil? || @context.current_page?(path)
+          options = @options[:tag_options] || {}
+          options[:class] = "#{options[:class]} active".strip if active
+          @context.content_tag(@options[:tag], content, options)
         else
           ERB::Util.h(content)
         end
